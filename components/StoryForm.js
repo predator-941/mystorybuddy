@@ -17,10 +17,14 @@ const StoryForm = ({ onSubmit, isLoading }) => {
 
   // Wykrywanie języka przeglądarki/lokalizacji
   useEffect(() => {
-    // Uproszczona implementacja - w pełnej wersji można użyć geolokalizacji
-    const browserLang = navigator.language.split('-')[0];
-    if (['pl', 'en', 'de', 'es'].includes(browserLang)) {
-      setFormData(prev => ({ ...prev, language: browserLang }));
+    try {
+      // Uproszczona implementacja - w pełnej wersji można użyć geolokalizacji
+      const browserLang = navigator.language.split('-')[0];
+      if (['pl', 'en', 'de', 'es'].includes(browserLang)) {
+        setFormData(prev => ({ ...prev, language: browserLang }));
+      }
+    } catch (error) {
+      console.error("Błąd wykrywania języka:", error);
     }
   }, []);
 
@@ -33,7 +37,7 @@ const StoryForm = ({ onSubmit, isLoading }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Zapobiega domyślnemu przesłaniu formularza
     onSubmit(formData);
   };
 
