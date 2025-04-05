@@ -1,53 +1,3 @@
-// Importy modułów
-const { Configuration, OpenAIApi } = require('openai');
-
-// Konfiguracja OpenAI API
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
-// Funkcja pomocnicza do uzyskania odpowiedniego promptu
-function getPromptByLanguage(formData, lang) {
-  const prompts = {
-    pl: `Napisz krótką bajkę dla ${formData.childAge}-letniego dziecka o imieniu ${formData.childName}. 
-    Zainteresowania dziecka: ${formData.interests || 'różne zabawy'}. 
-    Temat bajki: ${formData.theme || 'przygoda'}. 
-    ${formData.problem ? `W bajce powinien być poruszony problem: ${formData.problem === 'custom' ? formData.customProblem : formData.problem}` : ''}
-    Bajka powinna być krótka (max 600 słów), pouczająca, pozytywna i dostosowana do wieku dziecka. 
-    Podziel tekst na akapity. 
-    Na początku podaj tytuł bajki w formacie: #Tytuł.`,
-    
-    // Pozostałe języki...
-  };
-  
-  return prompts[lang] || prompts.pl;
-}
-
-// Funkcja do generowania audio
-async function generateAudio(text, voice = 'adam') {
-  try {
-    // Kod funkcji generateAudio...
-    return {
-      success: true,
-      audioBase64: "dummy-data", // Tymczasowo, do testów
-      format: 'mp3',
-    };
-  } catch (error) {
-    console.error('Error generating audio:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-}
-
-// Funkcja do wyboru głosu
-function getVoiceForLanguage(language) {
-  // Kod funkcji...
-  return "default_voice";
-}
-
 // Handler dla API route
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -55,17 +5,62 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Reszta kodu funkcji handler...
+    const formData = req.body;
     
-    // Tymczasowa odpowiedź dla testów
-    return res.status(200).json({
+    // Sprawdzenie wymaganych pól
+    if (!formData.childName || !formData.childAge) {
+      return res.status(400).json({ error: 'Brakujące wymagane pola' });
+    }
+    
+    // W tej uproszczonej wersji generujemy przykładową bajkę zamiast używać OpenAI API
+    const title = `Przygoda ${formData.childName} w Zaczarowanym Lesie`;
+    
+    // Tworzenie treści bajki na podstawie danych z formularza
+    const content = `Dawno, dawno temu, w Zaczarowanym Lesie mieszkał ${formData.childAge}-letni odkrywca o imieniu ${formData.childName}. Wszyscy w lesie znali ${formData.childName} z wielkiej ciekawości świata i odwagi.
+
+Pewnego słonecznego poranka, gdy ptaki wesoło śpiewały swoje melodie, ${formData.childName} postanowił wyruszyć na poszukiwanie legendarnego Drzewa Marzeń. Według leśnej legendy, każdy kto odnajdzie to magiczne drzewo, może wypowiedzieć jedno życzenie, które się spełni.
+
+${formData.childName} zabrał swój mały plecak, włożył do niego kanapkę, butelkę wody i swój ulubiony kompas. "Dziś jest idealny dzień na przygodę!" - pomyślał z ekscytacją.
+
+W trakcie wędrówki przez las, ${formData.childName} spotkał wiele leśnych stworzeń. Najpierw natknął się na rodzinę królików, które pokazały mu skrót przez polanę pełną kolorowych kwiatów. Następnie spotkał mądrą sowę, która siedziała na gałęzi i obserwowała wszystko swoimi wielkimi oczami.
+
+"Dokąd zmierzasz, małą istoto?" - zapytała sowa, przekrzywiając głowę.
+
+"Szukam Drzewa Marzeń!" - odpowiedział z entuzjazmem ${formData.childName}.
+
+Sowa zamyśliła się przez chwilę, po czym powiedziała: "Drzewo Marzeń można znaleźć tylko wtedy, gdy ma się czyste i dobre serce. Podążaj ścieżką, która prowadzi w stronę zachodzącego słońca, a znajdziesz to, czego szukasz."
+
+${formData.childName} podziękował sowie za wskazówkę i ruszył we wskazanym kierunku. Droga nie była łatwa - musiał przejść przez gęste zarośla, przeskoczyć przez strumyk i wspiąć się na niewielkie wzgórze.
+
+Gdy już myślał, że się zgubił, nagle zobaczył przed sobą niezwykły widok. Na środku małej polany stało ogromne drzewo, którego liście mieniły się wszystkimi kolorami tęczy. Każdy liść błyszczał i delikatnie migotał, jakby był wysadzany drobnymi diamencikami.
+
+"To musi być Drzewo Marzeń!" - wykrzyknął podekscytowany ${formData.childName}.
+
+Podszedł powoli do drzewa i delikatnie dotknął jego kory. W tym momencie wszystkie liście zatrzepotały, jakby poruszył je delikatny wiatr, a z drzewa wydobył się łagodny głos:
+
+"Witaj, młody odkrywco. Znalazłeś Drzewo Marzeń dzięki swojej odwadze i dobremu sercu. Możesz teraz wypowiedzieć jedno życzenie."
+
+${formData.childName} zamknął oczy i pomyślał głęboko. Nie chciał prosić o zabawki ani słodycze. Zamiast tego, życzył sobie, aby wszystkie dzieci w jego wiosce miały piękne, kolorowe sny każdej nocy.
+
+Drzewo ponownie zatrzepotało liśćmi, a głos powiedział: "Twoje życzenie jest godne podziwu. Niech tak się stanie."
+
+Od tego dnia, wszystkie dzieci w wiosce ${formData.childName} miały kolorowe i piękne sny. A ${formData.childName}? Cóż, kontynuował swoje przygody w Zaczarowanym Lesie, stając się najsłynniejszym odkrywcą, jakiego kiedykolwiek znał leśny świat.
+
+I tak kończy się opowieść o ${formData.childName} i Drzewie Marzeń. Ale kto wie, jakie jeszcze przygody czekają na naszego bohatera w przyszłości?`;
+
+    // Przygotowanie odpowiedzi
+    const response = {
       success: true,
       story: {
-        title: "Testowa bajka",
-        content: "To jest testowa bajka wygenerowana przez API.",
-        language: "pl"
+        title,
+        content,
+        language: formData.language || 'pl',
+        childName: formData.childName,
+        theme: formData.theme || 'przygoda'
       }
-    });
+    };
+    
+    return res.status(200).json(response);
   } catch (error) {
     console.error('Error generating story:', error);
     return res.status(500).json({ 

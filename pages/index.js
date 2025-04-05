@@ -35,12 +35,36 @@ export default function Home() {
       if (data.success) {
         setGeneratedStory(data.story);
         
-        // Jeśli otrzymaliśmy dane audio, tworzymy URL
+        // Dla testów używamy statycznego URL audio zamiast konwersji
+        setAudioUrl("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+        
+        /* Do przyszłej implementacji z rzeczywistym audio z API:
         if (data.audio && data.audio.data) {
-          const audioBlob = base64ToBlob(data.audio.data, `audio/${data.audio.format}`);
-          const url = URL.createObjectURL(audioBlob);
-          setAudioUrl(url);
+          try {
+            const byteCharacters = atob(data.audio.data);
+            const byteArrays = [];
+            
+            for (let i = 0; i < byteCharacters.length; i += 512) {
+              const slice = byteCharacters.slice(i, i + 512);
+              
+              const byteNumbers = new Array(slice.length);
+              for (let j = 0; j < slice.length; j++) {
+                byteNumbers[j] = slice.charCodeAt(j);
+              }
+              
+              const byteArray = new Uint8Array(byteNumbers);
+              byteArrays.push(byteArray);
+            }
+            
+            const blob = new Blob(byteArrays, { type: `audio/${data.audio.format}` });
+            const url = URL.createObjectURL(blob);
+            setAudioUrl(url);
+          } catch (e) {
+            console.error("Błąd podczas przetwarzania audio:", e);
+            setAudioUrl("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+          }
         }
+        */
       } else {
         throw new Error(data.error || 'Nie udało się wygenerować bajki');
       }
@@ -52,56 +76,15 @@ export default function Home() {
     }
   };
 
-  // Funkcja konwertująca base64 do Blob
-  const base64ToBlob = (base64, mimeType) => {
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
-    
-    for (let i = 0; i < byteCharacters.length; i += 512) {
-      const slice = byteCharacters.slice(i, i + 512);
-      
-      const byteNumbers = new Array(slice.length);
-      for (let j = 0; j < slice.length; j++) {
-        byteNumbers[j] = slice.charCodeAt(j);
-      }
-      
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
-    
-    return new Blob(byteArrays, { type: mimeType });
-  };
-
   // Funkcja obsługująca pobieranie bajki
   const handleDownload = () => {
     // W wersji darmowej pokazujemy modal zachęcający do zakupu
     alert('Funkcja pobierania dostępna w wersji premium. Już wkrótce!');
-    
-    // W pełnej implementacji należy dodać logikę płatności
-    // i pobierania plików audio oraz tekstu bajki
   };
 
   // Funkcja obsługująca udostępnianie bajki
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: generatedStory.title,
-        text: `Sprawdź wspaniałą bajkę "${generatedStory.title}" stworzoną dla ${generatedStory.childName}!`,
-        url: window.location.href,
-      }).catch(err => {
-        console.error('Error sharing:', err);
-      });
-    } else {
-      // Kopiowanie linku do schowka
-      const dummy = document.createElement('input');
-      document.body.appendChild(dummy);
-      dummy.value = window.location.href;
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-      
-      alert('Link skopiowany do schowka!');
-    }
+    alert('Funkcja udostępniania dostępna wkrótce!');
   };
 
   // Funkcja do resetowania stanu i tworzenia nowej bajki
@@ -135,11 +118,10 @@ export default function Home() {
             
             <div className="flex justify-center mb-12">
               <div className="relative w-64 h-64 md:w-80 md:h-80">
-                <Image
-                  src="/images/hero-illustration.png"
+                <img
+                  src="/api/placeholder/400/320"
                   alt="Dziecko czytające książkę"
-                  layout="fill"
-                  objectFit="contain"
+                  className="w-full h-full object-contain"
                 />
               </div>
             </div>
