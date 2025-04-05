@@ -5,6 +5,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("API otrzymało żądanie:", req.body);
     const formData = req.body;
     
     // Sprawdzenie wymaganych pól
@@ -60,6 +61,7 @@ I tak kończy się opowieść o ${formData.childName} i Drzewie Marzeń. Ale kto
       }
     };
     
+    console.log("API zwraca odpowiedź:", response);
     return res.status(200).json(response);
   } catch (error) {
     console.error('Error generating story:', error);

@@ -12,7 +12,8 @@ const StoryForm = ({ onSubmit, isLoading }) => {
     interests: '',
     problem: '',
     email: '',
-    language: 'pl' // domyślny język
+    language: 'pl', // domyślny język
+    theme: '' // dodane pole theme
   });
 
   // Wykrywanie języka przeglądarki/lokalizacji
@@ -30,6 +31,7 @@ const StoryForm = ({ onSubmit, isLoading }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Zmiana pola ${name} na wartość: ${value}`);
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -38,6 +40,7 @@ const StoryForm = ({ onSubmit, isLoading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Zapobiega domyślnemu przesłaniu formularza
+    console.log("Wysyłanie formularza z danymi:", formData);
     onSubmit(formData);
   };
 
@@ -164,7 +167,7 @@ const StoryForm = ({ onSubmit, isLoading }) => {
             <textarea
               name="customProblem"
               rows={2}
-              value={formData.customProblem}
+              value={formData.customProblem || ''}
               onChange={handleChange}
               className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
               placeholder="Opisz problem, który chcesz poruszyć w bajce..."
