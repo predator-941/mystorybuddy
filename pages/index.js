@@ -1,4 +1,4 @@
-import { useState } from 'react';
+const testAudioUrl = "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";import { useState } from 'react';
 import Head from 'next/head';
 import StoryForm from '../components/StoryForm';
 import StoryDisplay from '../components/StoryDisplay';
@@ -39,7 +39,7 @@ export default function Home() {
         setGeneratedStory(data.story);
         
         // Dla testów używamy statycznego URL audio
-        const testAudioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+       const testAudioUrl = "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";
         console.log("Ustawianie testowego URL audio:", testAudioUrl);
         setAudioUrl(testAudioUrl);
         
