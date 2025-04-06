@@ -1,13 +1,62 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AdBanner from './AdBanner';
 
 const StoryDisplay = ({ story, audioUrl, onDownload, onShare }) => {
   console.log("StoryDisplay otrzymał props:", { story, audioUrl });
+  const audioRef = useRef(null);
+  
+  // Funkcja sprawdzająca audio po załadowaniu komponentu
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      console.log("Próba odtworzenia audio z URL:", audioUrl);
+      
+      // Dodaj nasłuchiwanie na różne zdarzenia audio
+      const audio = audioRef.current;
+      
+      const logEvent = (event) => console.log(`Audio event: ${event.type}`);
+      
+      audio.addEventListener('loadstart', logEvent);
+      audio.addEventListener('loadeddata', logEvent);
+      audio.addEventListener('canplay', logEvent);
+      audio.addEventListener('play', logEvent);
+      audio.addEventListener('error', (e) => {
+        console.error("Błąd audio:", e);
+        console.error("Kod błędu:", audio.error ? audio.error.code : "Brak kodu");
+        console.error("Wiadomość błędu:", audio.error ? audio.error.message : "Brak wiadomości");
+      });
+      
+      // Spróbuj załadować audio
+      audio.load();
+      
+      // Cleanup nasłuchiwania zdarzeń
+      return () => {
+        audio.removeEventListener('loadstart', logEvent);
+        audio.removeEventListener('loadeddata', logEvent);
+        audio.removeEventListener('canplay', logEvent);
+        audio.removeEventListener('play', logEvent);
+        audio.removeEventListener('error', logEvent);
+      };
+    }
+  }, [audioUrl]);
   
   if (!story) {
     console.error("StoryDisplay: Nie otrzymano danych bajki!");
     return <div>Brak danych bajki</div>;
   }
+  
+  // Funkcja do bezpośredniego odtwarzania audio
+  const playAudio = () => {
+    if (audioRef.current) {
+      console.log("Próba odtworzenia audio manualnie");
+      const playPromise = audioRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => console.log("Odtwarzanie rozpoczęte pomyślnie"))
+          .catch(error => console.error("Błąd odtwarzania:", error));
+      }
+    }
+  };
   
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto my-8">
@@ -15,24 +64,36 @@ const StoryDisplay = ({ story, audioUrl, onDownload, onShare }) => {
         {story.title || "Twoja bajka"}
       </h2>
       
-      {/* Uproszczony odtwarzacz audio */}
+      {/* Odtwarzacz audio z pełną diagnostyką */}
       <div className="mb-8 bg-gray-50 p-4 rounded-lg">
         {audioUrl ? (
-          <>
+          <div>
+            <p className="text-sm text-gray-500 mb-2">URL audio: {audioUrl.substring(0, 30)}...</p>
+            
             <audio 
+              ref={audioRef}
               src={audioUrl} 
               controls 
-              className="w-full"
-              onError={(e) => {
-                console.error("Błąd odtwarzacza audio:", e);
-                alert("Wystąpił problem z odtwarzaniem dźwięku. Sprawdź konsole po więcej szczegółów.");
-              }}
+              className="w-full mb-2"
               preload="auto"
             />
-            <div className="text-center mt-2">
-              <p className="text-sm text-gray-500">Jeśli dźwięk nie działa, możesz <a href={audioUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">otworzyć go bezpośrednio</a>.</p>
+            
+            <div className="flex flex-wrap gap-2 justify-center mt-3">
+              <button
+                onClick={playAudio}
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Rozpocznij odtwarzanie
+              </button>
+              
+              <button
+                onClick={() => window.open(audioUrl, '_blank')}
+                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Otwórz w nowej karcie
+              </button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="text-center p-4">
             <p className="text-gray-500">Dźwięk nie jest dostępny</p>
@@ -58,21 +119,15 @@ const StoryDisplay = ({ story, audioUrl, onDownload, onShare }) => {
       <div className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
         <button
           onClick={onDownload}
-          className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
           Pobierz Bajkę
         </button>
         
         <button
           onClick={onShare}
-          className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-          </svg>
           Udostępnij
         </button>
       </div>
