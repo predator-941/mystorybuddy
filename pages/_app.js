@@ -1,7 +1,6 @@
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
-  console.log("MyApp renderowany");
   return <Component {...pageProps} />;
 }
 
